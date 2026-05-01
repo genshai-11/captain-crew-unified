@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "types": ["vitest/globals", "node"],
+    "lib": ["ES2020", "DOM"]
+  },
+  "include": [
+    "tests/**/*.ts",
+    "packages/shared-types/src/**/*.ts",
+    "packages/shared-ai-client/src/**/*.ts",
+    "packages/shared-audio/src/**/*.ts",
+    "packages/shared-ui/src/**/*.{ts,tsx}",
+    "apps/thc-web/src/types.ts",
+    "apps/cc-web/src/types.ts"
+  ]
+}

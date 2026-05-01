@@ -1,0 +1,13 @@
+{
+  "projects": {
+    "default": "REPLACE_WITH_FIREBASE_PROJECT_ID"
+  },
+  "targets": {
+    "REPLACE_WITH_FIREBASE_PROJECT_ID": {
+      "hosting": {
+        "chunks-cc-faceoff": ["chunks-cc-faceoff"],
+        "chunks-tron-thc": ["chunks-tron-thc"]
+      }
+    }
+  }
+}

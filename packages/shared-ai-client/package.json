@@ -1,0 +1,12 @@
+{
+  "name": "@caption-crew/shared-ai-client",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@caption-crew/shared-types": "0.1.0"
+  }
+}

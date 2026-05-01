@@ -1,0 +1,26 @@
+{
+  "name": "caption-crew-unified",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev:thc": "npm --prefix apps/thc-web run dev",
+    "dev:cc": "npm --prefix apps/cc-web run dev",
+    "build:thc": "npm --prefix apps/thc-web run build",
+    "build:cc": "npm --prefix apps/cc-web run build",
+    "build": "npm run build:thc && npm run build:cc",
+    "serve:functions": "npm --prefix firebase/ai-functions run serve",
+    "test": "npm run test:runtime && npm run test:types",
+    "test:runtime": "vitest run",
+    "test:types": "tsc -p tsconfig.tests.json --noEmit",
+    "validate:functions": "node scripts/validate-functions-structure.mjs",
+    "smoke:workspace": "npm test && npm run build && npm run validate:functions",
+    "deploy:functions": "firebase deploy --only functions",
+    "deploy:hosting": "firebase deploy --only hosting:chunks-cc-faceoff,hosting:chunks-tron-thc",
+    "deploy:all": "node scripts/deploy-all.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}

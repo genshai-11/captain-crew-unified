@@ -1,0 +1,14 @@
+node_modules
+dist
+.firebase
+functions/node_modules
+functions/lib
+.env
+.env.*
+!.env.example
+.env.*.local
+
+tsconfig.app.tsbuildinfo
+tsconfig.node.tsbuildinfo
+vite.config.js
+vite.config.d.ts

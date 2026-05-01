@@ -1,0 +1,111 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdminEmail() {
+      return isSignedIn() && request.auth.token.email in ['lucy2511kh@gmail.com', 'le.ntmkh@gmail.com'];
+    }
+
+    function hasField(map, field) {
+      return map.keys().hasAny([field]);
+    }
+
+    function currentValue(map, field) {
+      return hasField(map, field) ? map[field] : null;
+    }
+
+    function isParticipant(room) {
+      return isSignedIn() && (
+        room.hostId == request.auth.uid ||
+        currentValue(room, 'captainId') == request.auth.uid ||
+        currentValue(room, 'crewId') == request.auth.uid
+      );
+    }
+
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).changedKeys();
+    }
+
+    // Non-participants can claim roles while waiting.
+    function isClaimingCaptain(room) {
+      return isSignedIn()
+        && room.status == 'waiting'
+        && currentValue(room, 'captainId') == null
+        && changedKeys().hasOnly(['captainId', 'updatedAt'])
+        && request.resource.data.captainId == request.auth.uid
+        && request.resource.data.hostId == room.hostId
+        && request.resource.data.status == room.status
+        && request.resource.data.createdAt == room.createdAt;
+    }
+
+    function isClaimingCrew(room) {
+      return isSignedIn()
+        && room.status == 'waiting'
+        && currentValue(room, 'crewId') == null
+        && changedKeys().hasOnly(['crewId', 'updatedAt'])
+        && request.resource.data.crewId == request.auth.uid
+        && request.resource.data.hostId == room.hostId
+        && request.resource.data.status == room.status
+        && request.resource.data.createdAt == room.createdAt;
+    }
+
+    match /admin_runtime_config/{docId} {
+      allow read, write: if isAdminEmail();
+    }
+
+    // Mapping from short join code -> roomId
+    match /room_codes/{code} {
+      allow get: if isSignedIn();
+      allow list: if false;
+      allow create: if isSignedIn()
+        && request.resource.data.keys().hasAll(['roomId', 'hostId', 'createdAt'])
+        && request.resource.data.hostId == request.auth.uid
+        && request.resource.data.roomId is string;
+      allow update, delete: if false;
+    }
+
+    // Per-user private data (rooms mapping, round history)
+    match /users/{uid}/{document=**} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    match /rooms/{roomId} {
+      // Host creates a room.
+      allow create: if isSignedIn() && request.resource.data.hostId == request.auth.uid;
+
+      // Players can open a waiting room by link to join it.
+      allow get: if isSignedIn() && (isParticipant(resource.data) || resource.data.status == 'waiting');
+
+      // No public listing. Admin can list to debug.
+      allow list: if isAdminEmail();
+
+      // Participants can update.
+      // Non-participants can only claim Captain/Crew while room is waiting.
+      allow update: if isParticipant(resource.data) || isClaimingCaptain(resource.data) || isClaimingCrew(resource.data);
+      allow delete: if false;
+
+      match /rounds/{roundId} {
+        allow create, get, list, update: if isParticipant(get(/databases/$(database)/documents/rooms/$(roomId)).data);
+        allow delete: if false;
+      }
+    }
+
+    // Public game settings (theme, timing, etc.)
+    match /game_settings/{docId} {
+      allow read: if true;
+      allow write: if isAdminEmail();
+    }
+
+    // Legacy THC collection (optional). Keep open for now.
+    match /rounds/{docId} {
+      allow read, write: if true;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

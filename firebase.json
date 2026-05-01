@@ -1,0 +1,35 @@
+{
+  "hosting": [
+    {
+      "target": "chunks-cc-faceoff",
+      "public": "apps/thc-web/dist",
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "rewrites": [{ "source": "**", "destination": "/index.html" }]
+    },
+    {
+      "target": "chunks-tron-thc",
+      "public": "apps/cc-web/dist",
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "rewrites": [{ "source": "**", "destination": "/index.html" }]
+    }
+  ],
+  "functions": {
+    "source": "firebase/ai-functions",
+    "codebase": "captioncrewshared"
+  },
+  "firestore": {
+    "rules": "firebase/firestore.rules",
+    "indexes": "firebase/firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "firebase/storage.rules"
+  },
+  "database": {
+    "rules": "firebase/database.rules.json"
+  },
+  "auth": {
+    "providers": {
+      "emailPassword": true
+    }
+  }
+}
