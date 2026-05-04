@@ -1,4 +1,4 @@
-# captainn-crew-unified
+# captain-crew-unified
 
 Unified workspace for the THC + CC product line.
 
