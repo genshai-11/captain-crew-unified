@@ -2,13 +2,16 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { addDoc, collection, doc, getDoc, runTransaction, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 import { ref as storageRef, uploadBytes } from 'firebase/storage';
 import { auth, db, storage } from '@/lib/firebase';
+import { loadAdminRuntimeConfig } from '@/services/adminConfigRepository';
 import { evaluateCaptionCrewMeaning } from '@/services/meaningService';
 import { transcribeRoundAudio } from '@/services/transcriptionService';
+import { analyzeTranscript } from '@/services/aiService';
 import { saveRound } from '@/services/roundRepository';
 import { useRoundRecorder } from '@/hooks/useRoundRecorder';
 import { createRoomWithJoinCode } from './roomService';
 import { usePublicTiming } from '@/hooks/usePublicTiming';
 import { usePublicScoring } from '@/hooks/usePublicScoring';
+import type { OhmResult } from '@/types';
 import type { RoomDoc, RoomRoundDoc } from './types';
 
 function extensionForMime(mime: string) {
@@ -17,6 +20,17 @@ function extensionForMime(mime: string) {
   if (m.includes('audio/ogg')) return 'ogg';
   if (m.includes('audio/webm')) return 'webm';
   return 'webm';
+}
+
+function toOhmScore(voltage: number) {
+  if (voltage <= 0) return 0;
+  return Math.max(0, Math.min(100, Math.round((voltage / 120) * 100)));
+}
+
+function getDifficultyLabel(voltage: number) {
+  if (voltage >= 45) return 'Advanced';
+  if (voltage >= 25) return 'Intermediate';
+  return 'Beginner';
 }
 
 async function uploadRoundAudio(params: {
@@ -204,6 +218,7 @@ export function useRoomGame(params: {
       captainTranscript: (currentRound as any).captainTranscriptMeta,
       crewTranscript: (currentRound as any).crewTranscriptMeta,
       evaluation: evalWithWinner,
+      ohmResult: (currentRound as any).ohmResult || null,
       reactionDelayMs: (currentRound as any).reactionDelayMs ?? null,
       timeoutLost: endReason === 'crew_timeout' && isCrew,
       captainAudioPath: (currentRound as any).captainAudioPath,
@@ -343,6 +358,56 @@ export function useRoomGame(params: {
         strictness: 'medium',
       });
 
+      let ohmResult: OhmResult | null = null;
+      try {
+        const runtimeConfig = loadAdminRuntimeConfig();
+
+        const rawPrimaryModel = String(runtimeConfig.ohmModel || runtimeConfig.router9Model || '').trim();
+        const rawFallbackModel = String(runtimeConfig.ohmFallbackModel || runtimeConfig.router9FallbackModel || '').trim();
+
+        const normalizeModel = (value: string) => {
+          const v = String(value || '').trim();
+          if (!v) return '';
+          if (v.toLowerCase().startsWith('google/')) return '';
+          return v;
+        };
+
+        const safeModel = normalizeModel(rawPrimaryModel) || 'gpt';
+        const safeFallbackModel = normalizeModel(rawFallbackModel) || safeModel;
+
+        const aiAnalysis = await analyzeTranscript(captainTranscript, {
+          model: safeModel,
+          fallbackModel: safeFallbackModel,
+          reactionDelayMs: Number(data?.reactionDelayMs || 0) || undefined,
+          sessionId: `${roomId}-${currentRound.id}`,
+        });
+
+        const totalOhm = Number(aiAnalysis.totalOhm || 0);
+        const current = Number(aiAnalysis.lengthCoefficient || 1);
+        const voltage = totalOhm;
+
+        ohmResult = {
+          totalOhm,
+          formula: String(aiAnalysis.formula || '0'),
+          current,
+          voltage,
+          score: toOhmScore(voltage),
+          difficulty: getDifficultyLabel(voltage),
+          chunkCount: Array.isArray(aiAnalysis.chunks) ? aiAnalysis.chunks.length : 0,
+          chunks: Array.isArray(aiAnalysis.chunks)
+            ? aiAnalysis.chunks
+                .map((chunk) => ({
+                  text: String(chunk?.text || ''),
+                  label: String(chunk?.label || '').toUpperCase(),
+                  ohm: Number(chunk?.ohm || 0),
+                }))
+                .filter((chunk) => ['GREEN', 'BLUE', 'RED', 'PINK'].includes(chunk.label)) as OhmResult['chunks']
+            : [],
+        };
+      } catch (error) {
+        console.warn('OHM analysis failed for room flow', error);
+      }
+
       const captainStoppedAtMs = Number(data?.captainStoppedAtMs || 0);
       const crewStartedAtMs = Number(data?.crewStartedAtMs || 0);
       const reactionDelayMs =
@@ -355,6 +420,7 @@ export function useRoomGame(params: {
         meaningScore: evaluation.matchScore,
         feedback: evaluation.reason,
         meaningAnalysis: evaluation,
+        ohmResult: ohmResult || null,
         reactionDelayMs: reactionDelayMs ?? null,
         winnerRole,
         endReason: 'meaning',

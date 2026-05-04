@@ -9,7 +9,7 @@ export type RoundState =
   | 'evaluating'
   | 'results';
 
-export type VisualTheme = 'minimal' | 'bold';
+export type VisualTheme = 'minimal' | 'bold' | 'swiss';
 export type Strictness = 'loose' | 'medium' | 'strict';
 export type TranscriptSource = 'streaming' | 'batch' | 'streaming-fallback-batch';
 
@@ -137,5 +137,6 @@ export interface RoomRoundDoc {
   meaningScore?: number;
   feedback?: string;
   meaningAnalysis?: MeaningEvaluation;
+  ohmResult?: OhmResult | null;
   reactionDelayMs?: number;
 }

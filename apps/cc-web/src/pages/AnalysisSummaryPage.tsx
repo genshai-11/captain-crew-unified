@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { ResultCard } from '@/components/ResultCard';
 import { SummaryVoiceCard } from '@/components/SummaryVoiceCard';
+import { SummaryOhmCard } from '@/components/SummaryOhmCard';
 import { SummaryLocationState } from '@/types';
 
 export default function AnalysisSummaryPage() {
@@ -88,6 +89,11 @@ export default function AnalysisSummaryPage() {
           />
         </section>
       )}
+
+      <SummaryOhmCard
+        ohmResult={summary?.ohmResult || null}
+        reactionDelayMs={summary?.reactionDelayMs}
+      />
 
       {summary?.evaluation && (
         <ResultCard

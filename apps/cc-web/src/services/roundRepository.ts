@@ -34,6 +34,10 @@ function saveLocalHistory(rounds: RoundRecord[]) {
   localStorage.setItem(HISTORY_KEY, JSON.stringify(rounds.slice(0, 50)));
 }
 
+function stripUndefined<T extends Record<string, unknown>>(obj: T): Partial<T> {
+  return Object.fromEntries(Object.entries(obj).filter(([, value]) => value !== undefined)) as Partial<T>;
+}
+
 export async function saveSettings(settings: GameSettings) {
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
   if (db) {
@@ -67,7 +71,8 @@ export async function saveRound(round: RoundRecord) {
 
   const uid = auth?.currentUser?.uid || null;
   if (db && uid) {
-    await setDoc(doc(db, 'users', uid, 'history', normalized.id), normalized, { merge: true });
+    const safePayload = stripUndefined(normalized as unknown as Record<string, unknown>);
+    await setDoc(doc(db, 'users', uid, 'history', normalized.id), safePayload, { merge: true });
   }
 }
 

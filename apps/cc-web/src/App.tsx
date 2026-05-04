@@ -10,7 +10,7 @@ import LobbyPage from '@/pages/LobbyPage';
 import RoomPage from '@/pages/RoomPage';
 import { RequirePlayer } from '@/auth/PlayerAuth';
 import SettingsPage from '@/pages/SettingsPage';
-import { defaultAdminRuntimeConfig, loadCachedVisualTheme, loadPublicVisualTheme } from '@/services/adminConfigRepository';
+import { defaultAdminRuntimeConfig, hydrateAdminRuntimeConfigFromCloud, loadCachedVisualTheme, loadPublicVisualTheme } from '@/services/adminConfigRepository';
 import type { VisualTheme } from '@/types';
 
 function AppShell() {
@@ -19,6 +19,10 @@ function AppShell() {
 
   useEffect(() => {
     let cancelled = false;
+
+    void hydrateAdminRuntimeConfigFromCloud().catch((error) => {
+      console.warn('Could not hydrate runtime config from cloud, using local cache/defaults.', error);
+    });
 
     loadPublicVisualTheme()
       .then((theme) => {
@@ -44,7 +48,7 @@ function AppShell() {
     <div className={`app-shell theme-${visualTheme}`}>
       <Routes>
         <Route path="/" element={<RequirePlayer><LobbyPage /></RequirePlayer>} />
-        <Route path="/room/:roomId" element={<RoomPage />} />
+        <Route path="/room/:roomId" element={<RequirePlayer><RoomPage /></RequirePlayer>} />
         <Route path="/summary" element={<AnalysisSummaryPage />} />
         <Route path="/history" element={<HistoryPage />} />
         <Route path="/settings" element={<SettingsPage />} />

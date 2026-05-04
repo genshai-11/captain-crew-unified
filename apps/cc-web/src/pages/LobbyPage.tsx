@@ -62,25 +62,35 @@ export default function LobbyPage() {
 
   return (
     <main className="screen-shell">
-      <header className="page-header">
-        <div>
-          <p className="page-kicker">Captain & Crew</p>
-          <h1 className="page-title">Rooms</h1>
-          <p className="muted-copy">Create a room and invite your partner to join as Captain/Crew.</p>
+      <header className="page-header brand-header lobby-page-header">
+        <div className="chunks-brand-block">
+          <img src="/chunks-logo.png" alt="Chunks" className="chunks-logo lobby-logo-fill" />
+          <div>
+            <p className="page-kicker">Captain & Crew</p>
+            <h1 className="page-title">Rooms</h1>
+          </div>
         </div>
         <div className="action-row">
-          <button type="button" className="ghost-pill-button" onClick={() => void signOutPlayer()}>
-            Sign out
+          <button
+            type="button"
+            className="ghost-pill-button icon-signout-button"
+            onClick={() => void signOutPlayer()}
+            aria-label="Sign out"
+            title="Sign out"
+          >
+            ↪
           </button>
         </div>
       </header>
 
-      <section className="soft-card admin-section-minimal">
+      <section className="soft-card admin-section-minimal lobby-primary-card">
         <div className="action-row">
           <button type="button" className="primary-pill-button" onClick={() => void createRoom()}>
             Create new room
           </button>
         </div>
+
+        <p className="muted-copy lobby-helper-copy">Create a room and invite your partner to join as Captain/Crew.</p>
 
         <div className="field-stack" style={{ marginTop: 16 }}>
           <label>Join by room code</label>

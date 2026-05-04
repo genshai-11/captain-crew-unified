@@ -1,4 +1,4 @@
-import type { MeaningEvaluation, TranscriptResult } from '@/types';
+import type { MeaningEvaluation, OhmResult, TranscriptResult } from '@/types';
 
 export type RoomStatus = 'waiting' | 'playing' | 'finished';
 export type RoundStatus = 'captain_speaking' | 'crew_speaking' | 'evaluating' | 'finished';
@@ -44,5 +44,6 @@ export interface RoomRoundDoc {
   meaningScore?: number;
   feedback?: string;
   meaningAnalysis?: MeaningEvaluation;
+  ohmResult?: OhmResult | null;
   reactionDelayMs?: number;
 }

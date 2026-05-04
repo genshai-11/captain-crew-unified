@@ -7,6 +7,7 @@ import { useMicrophoneGate } from '@/hooks/useMicrophoneGate';
 import { RolePanel } from '@/components/RolePanel';
 import { ResultCard } from '@/components/ResultCard';
 import { SummaryVoiceCard } from '@/components/SummaryVoiceCard';
+import { SummaryOhmCard } from '@/components/SummaryOhmCard';
 import { db, storage } from '@/lib/firebase';
 import { useRoom } from '@/rooms/useRoom';
 import { useRoomGame } from '@/rooms/useRoomGame';
@@ -179,16 +180,16 @@ function RoomInner({ roomId, userId, onLeave }: { roomId: string; userId: string
 
   return (
     <main className="game-screen">
-      <div className="game-header brand-header">
+      <div className="game-header brand-header room-page-header">
         <div className="chunks-brand-block">
-          <img src="/chunks-logo.png" alt="Chunks" className="chunks-logo" />
+          <img src="/chunks-logo.png" alt="Chunks" className="chunks-logo room-logo-tight" />
           <div>
             <p className="game-kicker">Room</p>
             <h1 className="game-title">{String(room.joinCode || roomId.slice(0, 6)).toUpperCase()}</h1>
-            <p className="muted-copy" style={{ marginTop: 4, marginBottom: 0 }}>Code: {String(room.joinCode || roomId.slice(0, 6)).toUpperCase()}</p>
+
           </div>
         </div>
-        <div className="action-row">
+        <div className="action-row room-header-actions">
           <button type="button" className="ghost-pill-button" onClick={() => void copyInvite()}>Copy invite</button>
           <button type="button" className="ghost-pill-button" onClick={() => void copyCode()}>Copy code</button>
           <button type="button" className="ghost-pill-button" onClick={onLeave}>Leave</button>
@@ -270,6 +271,13 @@ function RoomInner({ roomId, userId, onLeave }: { roomId: string; userId: string
                     audioFallbackMessage="Audio replay is available on the recording device. (To share across devices, enable Firebase Storage.)"
                   />
                 </section>
+              )}
+
+              {currentRound?.status === 'finished' && (
+                <SummaryOhmCard
+                  ohmResult={(currentRound as any)?.ohmResult || null}
+                  reactionDelayMs={currentRound?.reactionDelayMs || null}
+                />
               )}
 
               {evaluation && (
