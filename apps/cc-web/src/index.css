@@ -169,59 +169,15 @@ input:focus, select:focus {
 .room-page-header {
   flex-direction: column;
   align-items: flex-start;
-  gap: 14px;
-}
-
-.room-brand-block {
-  align-items: center;
-  gap: 14px;
-}
-
-.room-brand-copy {
-  display: grid;
-  gap: 2px;
-}
-
-.room-brand-title {
-  margin-top: 0;
-}
-
-.room-toolbar {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  flex-wrap: wrap;
-}
-
-.room-code-inline {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.room-code-label {
-  font-size: 12px;
-  line-height: 1.4;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.room-code-value {
-  font-size: clamp(34px, 6vw, 58px);
-  line-height: 0.95;
-  font-weight: 700;
-  letter-spacing: -0.05em;
+  gap: 10px;
 }
 
 .room-header-actions {
-  width: auto;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  width: 100%;
+  flex-wrap: nowrap;
   gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .room-header-actions .ghost-pill-button {
@@ -230,16 +186,6 @@ input:focus, select:focus {
   font-size: 13px;
   letter-spacing: 0.02em;
   white-space: nowrap;
-}
-
-@media (max-width: 720px) {
-  .room-toolbar {
-    align-items: flex-start;
-  }
-
-  .room-header-actions {
-    justify-content: flex-start;
-  }
 }
 
 .primary-pill-button, .ghost-pill-button {

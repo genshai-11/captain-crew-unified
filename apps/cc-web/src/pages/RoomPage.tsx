@@ -114,15 +114,14 @@ function RoomInner({ roomId, userId, onLeave }: { roomId: string; userId: string
   const canJoinAsCaptain = useMemo(() => !!room && !room.captainId && room.crewId !== userId, [room, userId]);
   const canJoinAsCrew = useMemo(() => !!room && !room.crewId && room.captainId !== userId, [room, userId]);
 
-  const roomCode = String(room.joinCode || roomId.slice(0, 6)).toUpperCase();
-
   const copyInvite = async () => {
     await navigator.clipboard.writeText(`${window.location.origin}/room/${roomId}`);
   };
 
   const copyCode = async () => {
     if (!room) return;
-    await navigator.clipboard.writeText(roomCode);
+    const code = String(room.joinCode || roomId.slice(0, 6)).toUpperCase();
+    await navigator.clipboard.writeText(code);
   };
 
   const startNewRound = async () => {
@@ -182,25 +181,18 @@ function RoomInner({ roomId, userId, onLeave }: { roomId: string; userId: string
   return (
     <main className="game-screen">
       <div className="game-header brand-header room-page-header">
-        <div className="chunks-brand-block room-brand-block">
+        <div className="chunks-brand-block">
           <img src="/chunks-logo.png" alt="Chunks" className="chunks-logo room-logo-tight" />
-          <div className="room-brand-copy">
-            <p className="game-kicker">Caption & Crew</p>
-            <h1 className="game-title room-brand-title">Tròn THC</h1>
+          <div>
+            <p className="game-kicker">Room</p>
+            <h1 className="game-title">{String(room.joinCode || roomId.slice(0, 6)).toUpperCase()}</h1>
+
           </div>
         </div>
-
-        <div className="room-toolbar">
-          <div className="room-code-inline">
-            <span className="room-code-label">Room</span>
-            <span className="room-code-value">{roomCode}</span>
-          </div>
-
-          <div className="action-row room-header-actions">
-            <button type="button" className="ghost-pill-button" onClick={() => void copyInvite()}>Copy invite</button>
-            <button type="button" className="ghost-pill-button" onClick={() => void copyCode()}>Copy code</button>
-            <button type="button" className="ghost-pill-button" onClick={onLeave}>Leave</button>
-          </div>
+        <div className="action-row room-header-actions">
+          <button type="button" className="ghost-pill-button" onClick={() => void copyInvite()}>Copy invite</button>
+          <button type="button" className="ghost-pill-button" onClick={() => void copyCode()}>Copy code</button>
+          <button type="button" className="ghost-pill-button" onClick={onLeave}>Leave</button>
         </div>
       </div>
 
